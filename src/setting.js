@@ -199,6 +199,7 @@ let defaults = {
   'view.show_comments': false,
   'view.show_coordinates': false,
   'view.show_graph': false,
+  'view.show_gamename_in_title': false,
   'view.show_move_colorization': true,
   'view.show_move_numbers': false,
   'view.show_next_moves': true,

@@ -302,6 +302,10 @@ class GeneralTab extends Component {
           id: 'comments.show_move_interpretation',
           text: t('Show automatic move titles'),
         }),
+        h(PreferencesItem, {
+          id: 'view.show_gamename_in_title',
+          text: t('Show game name in window title'),
+        }),
         h(
           'li',
           {class: 'select'},

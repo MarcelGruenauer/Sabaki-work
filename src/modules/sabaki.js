@@ -91,6 +91,7 @@ class Sabaki extends EventEmitter {
       leftSidebarWidth: setting.get('view.leftsidebar_width'),
       showWinrateGraph: setting.get('view.show_winrategraph'),
       showGameGraph: setting.get('view.show_graph'),
+      showGameNameInTitle: null,
       showCommentBox: setting.get('view.show_comments'),
       sidebarWidth: setting.get('view.sidebar_width'),
       graphGridSize: null,
@@ -240,6 +241,7 @@ class Sabaki extends EventEmitter {
         let title = self.appName
         let {representedFilename, gameIndex, gameTrees} = state
         let t = i18n.context('sabaki.window')
+        let gameTree = gameTrees[gameIndex]
 
         if (representedFilename) title = basename(representedFilename)
 
@@ -249,6 +251,12 @@ class Sabaki extends EventEmitter {
             t((p) => `Game ${p.gameNumber}`, {
               gameNumber: gameIndex + 1,
             })
+        }
+
+        if (state.showGameNameInTitle && gameTree != null) {
+          let gameName = gametree.getRootProperty(gameTree, 'GN', '').trim()
+
+          if (gameName !== '') title += ' — ' + gameName
         }
 
         if (representedFilename && process.platform != 'darwin') {
@@ -313,6 +321,7 @@ class Sabaki extends EventEmitter {
       'board.analysis_type': 'analysisType',
       'board.show_analysis': 'showAnalysis',
       'view.show_menubar': 'showMenuBar',
+      'view.show_gamename_in_title': 'showGameNameInTitle',
       'view.show_coordinates': 'showCoordinates',
       'view.show_move_colorization': 'showMoveColorization',
       'view.show_move_numbers': 'showMoveNumbers',
