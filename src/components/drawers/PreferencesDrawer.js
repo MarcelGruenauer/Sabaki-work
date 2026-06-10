@@ -32,6 +32,7 @@ const setting = {
   onDidChange: (callback) => window.sabaki.setting.onDidChange(callback),
 }
 const t = i18n.context('PreferencesDrawer')
+const defaultCommentFontSize = 14
 
 class PreferencesItem extends Component {
   constructor(props) {
@@ -82,6 +83,8 @@ class GeneralTab extends Component {
 
     this.state = {
       appLang: setting.get('app.lang'),
+      commentFontSize:
+        setting.get('comments.font_size') || defaultCommentFontSize,
       variationReplayMode: setting.get('board.variation_replay_mode'),
     }
 
@@ -114,9 +117,15 @@ class GeneralTab extends Component {
       setting.set('board.variation_replay_mode', evt.currentTarget.value)
     }
 
+    this.handleCommentFontSizeChange = (evt) => {
+      setting.set('comments.font_size', +evt.currentTarget.value)
+    }
+
     setting.onDidChange(({key, value}) => {
       if (key === 'app.lang') {
         this.setState({appLang: value})
+      } else if (key === 'comments.font_size') {
+        this.setState({commentFontSize: value})
       } else if (key === 'board.variation_replay_mode') {
         this.setState({variationReplayMode: value})
       }
@@ -293,6 +302,32 @@ class GeneralTab extends Component {
           id: 'comments.show_move_interpretation',
           text: t('Show automatic move titles'),
         }),
+        h(
+          'li',
+          {class: 'select'},
+          h(
+            'label',
+            {},
+            t('Comment Font Size:'),
+            ' ',
+
+            h(
+              'select',
+              {onChange: this.handleCommentFontSizeChange},
+
+              [14, 15, 16, 17, 18, 19, 20].map((fontSize) =>
+                h(
+                  'option',
+                  {
+                    value: fontSize,
+                    selected: this.state.commentFontSize === fontSize,
+                  },
+                  `${fontSize}px`,
+                ),
+              ),
+            ),
+          ),
+        ),
         h(PreferencesItem, {
           id: 'game.show_ko_warning',
           text: t('Show ko warning'),

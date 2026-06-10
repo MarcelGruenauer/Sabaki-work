@@ -63,6 +63,7 @@ let defaults = {
   'cleanmarkup.winrate': false,
   'comments.show_move_interpretation': true,
   'comments.commit_delay': 500,
+  'comments.font_size': 14,
   'console.max_history_count': 1000,
   'debug.dev_tools': false,
   'edit.click_currentvertex_to_remove': true,

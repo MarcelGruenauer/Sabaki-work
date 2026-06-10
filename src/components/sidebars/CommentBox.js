@@ -12,7 +12,11 @@ import {vertexEquals, typographer, noop} from '../../modules/helper.js'
 import MarkdownContentDisplay from '../MarkdownContentDisplay.js'
 
 const t = i18n.context('CommentBox')
-const setting = {get: (key) => window.sabaki.setting.get(key)}
+const setting = {
+  get: (key) => window.sabaki.setting.get(key),
+  onDidChange: (callback) => window.sabaki.setting.onDidChange(callback),
+}
+const defaultCommentFontSize = 14
 
 let commentsCommitDelay = setting.get('comments.commit_delay')
 
@@ -216,16 +220,17 @@ class CommentTitle extends Component {
 }
 
 class CommentText extends Component {
-  shouldComponentUpdate({comment}) {
-    return comment !== this.props.comment
+  shouldComponentUpdate({comment, fontSize}) {
+    return comment !== this.props.comment || fontSize !== this.props.fontSize
   }
 
-  render({comment}) {
+  render({comment, fontSize}) {
     return h(
       'div',
       {
         ref: (el) => (this.element = el),
         class: 'comment',
+        style: {fontSize},
       },
 
       h(MarkdownContentDisplay, {source: comment}),
@@ -240,6 +245,8 @@ export default class CommentBox extends Component {
     this.state = {
       title: '',
       comment: '',
+      commentFontSize:
+        setting.get('comments.font_size') || defaultCommentFontSize,
     }
 
     this.handleCommentInput = () => {
@@ -274,6 +281,12 @@ export default class CommentBox extends Component {
 
       sabaki.openCommentMenu(treePosition, {x: left, y: bottom})
     }
+
+    setting.onDidChange(({key, value}) => {
+      if (key === 'comments.font_size') {
+        this.setState({commentFontSize: value})
+      }
+    })
   }
 
   shouldComponentUpdate() {
@@ -316,8 +329,10 @@ export default class CommentBox extends Component {
 
       onLinkClick = noop,
     },
-    {title, comment},
+    {title, comment, commentFontSize},
   ) {
+    let commentFontSizeStyle = `${commentFontSize || defaultCommentFontSize}px`
+
     return h(
       'section',
       {
@@ -339,6 +354,7 @@ export default class CommentBox extends Component {
 
         h(CommentText, {
           comment,
+          fontSize: commentFontSizeStyle,
           onLinkClick,
         }),
       ),
@@ -376,6 +392,7 @@ export default class CommentBox extends Component {
           ref: (el) => (this.textareaElement = el),
           placeholder: t('Comment'),
           value: comment,
+          style: {fontSize: commentFontSizeStyle},
           onInput: this.handleCommentInput,
           onBlur: this.handleCommentBlur,
         }),
