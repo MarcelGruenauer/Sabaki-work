@@ -94,6 +94,7 @@ class GameListItem extends Component {
         h(MiniGoban, {
           board: getPreviewBoard(tree),
           maxSize: thumbnailSize,
+          cropToQuadrant: true,
           visible: showThumbnail,
         }),
 
@@ -596,6 +597,7 @@ export default class GameChooserDrawer extends Component {
         h(MiniGoban, {
           board: getPreviewBoard(gameTrees[gameIndex]),
           maxSize: thumbnailSize,
+          cropToQuadrant: true,
         }),
       ),
     )
