@@ -20,6 +20,12 @@ let itemMinWidth = thumbnailSize + 12 + 20
 let itemHeight = 253 + 10 + 20
 
 let getPreviewBoard = (tree) => {
+  for (let node of tree.listNodes()) {
+    if (node.data.N != null && node.data.N.includes('thumbnail')) {
+      return gametree.getBoard(tree, node.id)
+    }
+  }
+
   let node = tree.navigate(tree.root.id, 30, {})
   if (!node)
     node = tree.navigate(tree.root.id, tree.getCurrentHeight({}) - 1, {})
