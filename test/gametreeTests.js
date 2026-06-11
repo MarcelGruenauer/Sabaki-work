@@ -58,4 +58,25 @@ describe('gametree', () => {
       assert.equal(gametree.getNodeByTreePath(tree, '5a8c1'), null)
     })
   })
+
+  describe('getTreePath', () => {
+    it('formats main-line nodes', () => {
+      assert.equal(gametree.getTreePath(tree, tree.root.id), '0')
+      assert.equal(
+        gametree.getTreePath(tree, gametree.getNodeByTreePath(tree, '5').id),
+        '5',
+      )
+    })
+
+    it('formats variation nodes', () => {
+      for (let path of ['6a2', '6b3', '5a8a3']) {
+        let node = gametree.getNodeByTreePath(tree, path)
+        assert.equal(gametree.getTreePath(tree, node.id), path)
+      }
+    })
+
+    it('returns null for missing nodes', () => {
+      assert.equal(gametree.getTreePath(tree, 'missing'), null)
+    })
+  })
 })
