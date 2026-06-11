@@ -44,6 +44,10 @@ export default class Goban extends Component {
         oldHandler(evt, originalVertex)
       }
     }
+
+    this.handleTouchStart = this.handleTouchStart.bind(this)
+    this.handleTouchMove = this.handleTouchMove.bind(this)
+    this.handleTouchEnd = this.handleTouchEnd.bind(this)
   }
 
   componentDidMount() {
@@ -63,6 +67,10 @@ export default class Goban extends Component {
 
     this.resize()
     this.componentWillReceiveProps()
+  }
+
+  componentWillUnmount() {
+    this.clearLongPress()
   }
 
   componentDidUpdate() {
@@ -135,6 +143,89 @@ export default class Goban extends Component {
 
     this.setState({clicked: true})
     setTimeout(() => this.setState({clicked: false}), 200)
+  }
+
+  clearLongPress() {
+    clearTimeout(this.longPressId)
+    this.longPressId = null
+  }
+
+  getTouchVertex(touch) {
+    if (!this.element) return null
+
+    let contentElement = this.element.querySelector('.shudan-content')
+    if (!contentElement) return null
+
+    let {board, transformation} = this.props
+    let {width, height} = gobantransformer.transformSize(
+      board.width,
+      board.height,
+      transformation,
+    )
+    let rect = contentElement.getBoundingClientRect()
+    let x = Math.floor(((touch.clientX - rect.left) / rect.width) * width)
+    let y = Math.floor(((touch.clientY - rect.top) / rect.height) * height)
+    let vertex = [x, y]
+
+    let inverse = gobantransformer.invert(transformation)
+    let originalVertex = gobantransformer.transformVertex(
+      vertex,
+      inverse,
+      width,
+      height,
+    )
+
+    return board.has(originalVertex) ? originalVertex : null
+  }
+
+  handleTouchStart(evt) {
+    if (evt.touches.length !== 1) return
+
+    let touch = evt.touches[0]
+    let vertex = this.getTouchVertex(touch)
+    if (vertex == null) return
+
+    this.longPressStart = {x: touch.clientX, y: touch.clientY, vertex}
+    this.clearLongPress()
+
+    this.longPressId = setTimeout(() => {
+      let {onVertexClick = helper.noop} = this.props
+      let {x, y, vertex} = this.longPressStart
+
+      this.mouseDown = false
+      this.clearLongPress()
+      this.stopPlayingVariation()
+
+      onVertexClick({
+        vertex,
+        button: 0,
+        ctrlKey: true,
+        x,
+        y,
+        clientX: x,
+        clientY: y,
+      })
+    }, 600)
+  }
+
+  handleTouchMove(evt) {
+    if (this.longPressStart == null || evt.touches.length !== 1) {
+      this.clearLongPress()
+      return
+    }
+
+    let touch = evt.touches[0]
+    let dx = touch.clientX - this.longPressStart.x
+    let dy = touch.clientY - this.longPressStart.y
+
+    if (Math.sqrt(dx * dx + dy * dy) > 10) {
+      this.clearLongPress()
+    }
+  }
+
+  handleTouchEnd() {
+    this.clearLongPress()
+    this.longPressStart = null
   }
 
   handleVertexMouseMove(evt, vertex) {
@@ -463,7 +554,13 @@ export default class Goban extends Component {
       id: 'goban',
       class: classNames({crosshair}),
       style: {top, left},
-      innerProps: {ref: (el) => (this.element = el)},
+      innerProps: {
+        ref: (el) => (this.element = el),
+        onTouchStart: this.handleTouchStart,
+        onTouchMove: this.handleTouchMove,
+        onTouchEnd: this.handleTouchEnd,
+        onTouchCancel: this.handleTouchEnd,
+      },
 
       maxWidth,
       maxHeight,

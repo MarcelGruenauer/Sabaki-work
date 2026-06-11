@@ -937,6 +937,76 @@ class Sabaki extends EventEmitter {
 
   // Playing
 
+  findVertexPlacement(vertex) {
+    let {gameTrees, gameIndex, treePosition} = this.state
+    let tree = gameTrees[gameIndex]
+    let board = gametree.getBoard(tree, treePosition)
+    let sequence = [...tree.listNodesVertically(treePosition, -1, {})].reverse()
+    let currentPlacement = null
+    let firstPlacement = null
+
+    let nodePutsStone = (node) => {
+      for (let prop of ['B', 'W']) {
+        if (node.data[prop] == null) continue
+        if (helper.vertexEquals(sgf.parseVertex(node.data[prop][0]), vertex)) {
+          return true
+        }
+      }
+
+      for (let prop of ['AW', 'AB']) {
+        if (node.data[prop] == null) continue
+
+        for (let value of node.data[prop]) {
+          if (
+            sgf
+              .parseCompressedVertices(value)
+              .some((v) => helper.vertexEquals(v, vertex))
+          ) {
+            return true
+          }
+        }
+      }
+
+      return false
+    }
+
+    for (let node of sequence) {
+      if (nodePutsStone(node)) {
+        currentPlacement = node.id
+        if (firstPlacement == null) firstPlacement = node.id
+      }
+
+      if (gametree.getBoard(tree, node.id).get(vertex) === 0) {
+        currentPlacement = null
+      }
+    }
+
+    return board.get(vertex) === 0 ? firstPlacement : currentPlacement
+  }
+
+  openVertexMenu(vertex, {x, y} = {}) {
+    let t = i18n.context('sabaki.play')
+    let {gameTrees, gameIndex} = this.state
+    let tree = gameTrees[gameIndex]
+    let treePosition = this.findVertexPlacement(vertex)
+
+    helper.popupMenu(
+      [
+        {
+          label: t('Go to that move'),
+          enabled: treePosition != null,
+          click: () => {
+            if (treePosition != null) {
+              this.setCurrentTreePosition(tree, treePosition)
+            }
+          },
+        },
+      ],
+      x,
+      y,
+    )
+  }
+
   clickVertex(vertex, {button = 0, ctrlKey = false, x = 0, y = 0} = {}) {
     this.closeDrawer()
 
@@ -951,6 +1021,11 @@ class Sabaki extends EventEmitter {
     }
 
     let [vx, vy] = vertex
+
+    if (ctrlKey) {
+      this.openVertexMenu(vertex, {x, y})
+      return
+    }
 
     if (['play', 'autoplay'].includes(this.state.mode)) {
       if (button === 0) {
