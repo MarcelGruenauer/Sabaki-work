@@ -57,6 +57,16 @@ export default class MiniGoban extends Component {
     let radius = fieldSize / 2
     let rangeX = range(width)
     let rangeY = range(height)
+    let gridX1 = offsetX === 0 ? radius + 1 : 1
+    let gridY1 = offsetY === 0 ? radius + 1 : 1
+    let gridX2 =
+      offsetX + width === board.width
+        ? (width - 1) * fieldSize + radius + 1
+        : width * fieldSize + 1
+    let gridY2 =
+      offsetY + height === board.height
+        ? (height - 1) * fieldSize + radius + 1
+        : height * fieldSize + 1
 
     return h(
       'svg',
@@ -65,6 +75,34 @@ export default class MiniGoban extends Component {
         height: fieldSize * height + 1,
         style: {visibility: visible ? 'visible' : 'hidden'},
       },
+
+      // Draw board grid for cropped previews
+
+      crop != null &&
+        h(
+          'g',
+          {
+            stroke: '#5E2E0C',
+            'stroke-opacity': 0.65,
+            'stroke-width': 0.5,
+          },
+          rangeY.map((y) =>
+            h('line', {
+              x1: gridX1,
+              y1: y * fieldSize + radius + 1,
+              x2: gridX2,
+              y2: y * fieldSize + radius + 1,
+            }),
+          ),
+          rangeX.map((x) =>
+            h('line', {
+              x1: x * fieldSize + radius + 1,
+              y1: gridY1,
+              x2: x * fieldSize + radius + 1,
+              y2: gridY2,
+            }),
+          ),
+        ),
 
       // Draw hoshi points
 
