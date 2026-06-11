@@ -1588,6 +1588,15 @@ class Sabaki extends EventEmitter {
   }
 
   goToMoveNumber(number) {
+    if (number.toString().trim().match(/[a-z]/i)) {
+      let {gameTrees, gameIndex} = this.state
+      let tree = gameTrees[gameIndex]
+      let node = gametree.getNodeByTreePath(tree, number)
+
+      if (node != null) this.setCurrentTreePosition(tree, node.id)
+      return
+    }
+
     number = +number
 
     if (isNaN(number)) return
