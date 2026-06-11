@@ -1,5 +1,6 @@
 import {h, Component} from 'preact'
 import sabaki from '../modules/sabaki.js'
+import * as gametree from '../modules/gametree.js'
 
 import SplitContainer from './helpers/SplitContainer.js'
 import WinrateGraph from './sidebars/WinrateGraph.js'
@@ -21,6 +22,7 @@ export default class Sidebar extends Component {
     super(props)
 
     this.state = {
+      showTreePath: false,
       winrateGraphHeight: setting.get('view.winrategraph_height'),
       sidebarSplit: setting.get('view.properties_height'),
     }
@@ -38,6 +40,10 @@ export default class Sidebar extends Component {
         (this.props.gameTree.getHeight() - 1) * percent,
       )
       sabaki.goToMoveNumber(moveNumber)
+    }
+
+    this.handleSliderTextToggle = () => {
+      this.setState(({showTreePath}) => ({showTreePath: !showTreePath}))
     }
 
     this.handleWinrateGraphChange = ({index}) => {
@@ -118,9 +124,10 @@ export default class Sidebar extends Component {
       winrateData,
       scoreLeadData,
     },
-    {winrateGraphHeight, sidebarSplit},
+    {showTreePath, winrateGraphHeight, sidebarSplit},
   ) {
     let node = gameTree.get(treePosition)
+    let treePath = gametree.getTreePath(gameTree, treePosition)
     let winrateGraphWidth = Math.max(
       Math.ceil((gameTree.getHeight() - 1) / 50) * 50,
       1,
@@ -163,13 +170,15 @@ export default class Sidebar extends Component {
 
             h(Slider, {
               showSlider: showGameGraph,
-              text: level,
+              text: showTreePath && treePath != null ? treePath : level,
+              textIsTreePath: showTreePath && treePath != null,
               percent:
                 gameTree.getHeight() <= 1
                   ? 0
                   : (level / (gameTree.getHeight() - 1)) * 100,
 
               onChange: this.handleSliderChange,
+              onTextToggle: this.handleSliderTextToggle,
               onStartAutoscrolling: this.handleStartAutoscrolling,
               onStopAutoscrolling: this.handleStopAutoscrolling,
             }),
