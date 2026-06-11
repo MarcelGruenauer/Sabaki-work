@@ -58,6 +58,43 @@ test.describe('Renderer Integration Tests', () => {
       expect(isAtRoot).toBe(true)
     })
 
+    test('goToMoveNumber with a plain number jumps to the main line', async ({
+      page,
+    }) => {
+      await page.evaluate(async () => {
+        await window.__sabaki.loadContent(
+          `
+          (;C[0];B[aa]C[1];W[bb]C[2];B[cc]C[3]
+            (;W[dd]C[4];B[ee]C[5])
+            (;W[ff]C[4a1];B[gg]C[4a2])
+          )
+          `,
+          'sgf',
+          {suppressAskForSave: true},
+        )
+      })
+
+      await waitForGameLoad(page)
+
+      const comments = await page.evaluate(() => {
+        const getCurrentComment = () => {
+          const {gameTrees, gameIndex, treePosition} = window.__sabaki.state
+          return gameTrees[gameIndex].get(treePosition).data.C[0]
+        }
+
+        window.__sabaki.goToMoveNumber('4a2')
+        const variationComment = getCurrentComment()
+
+        window.__sabaki.goToMoveNumber('4')
+        const plainNumberComment = getCurrentComment()
+
+        return {variationComment, plainNumberComment}
+      })
+
+      expect(comments.variationComment).toBe('4a2')
+      expect(comments.plainNumberComment).toBe('4')
+    })
+
     test('arrow key navigation moves through game tree', async ({page}) => {
       await page.evaluate(() => {
         window.__sabaki.goToBeginning()

@@ -1604,13 +1604,9 @@ class Sabaki extends EventEmitter {
     if (isNaN(number)) return
     if (number < 0) number = 0
 
-    let {gameTrees, gameIndex, gameCurrents} = this.state
+    let {gameTrees, gameIndex} = this.state
     let tree = gameTrees[gameIndex]
-    let node = tree.navigate(
-      tree.root.id,
-      Math.round(number),
-      gameCurrents[gameIndex],
-    )
+    let node = tree.navigate(tree.root.id, Math.round(number), {})
 
     if (node != null) this.setCurrentTreePosition(tree, node.id)
     else this.goToEnd()
