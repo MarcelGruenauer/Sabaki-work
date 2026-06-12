@@ -338,9 +338,13 @@ export default class Goban extends Component {
       if (showSiblings) {
         for (let v in board.siblingsInfo) {
           let [x, y] = v.split(',').map((x) => +x)
-          let {sign} = board.siblingsInfo[v]
+          let {sign, type} = board.siblingsInfo[v]
 
-          ghostStoneMap[y][x] = {sign, faint: showNextMoves}
+          ghostStoneMap[y][x] = {
+            sign,
+            type: showMoveColorization ? type : null,
+            faint: showNextMoves,
+          }
         }
       }
 
