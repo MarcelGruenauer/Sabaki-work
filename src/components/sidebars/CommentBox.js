@@ -282,10 +282,11 @@ export default class CommentBox extends Component {
 
   componentWillReceiveProps({treePosition, mode, title, comment}) {
     let treePositionChanged = treePosition !== this.props.treePosition
+    let modeChanged = mode !== this.props.mode
 
     if (mode === 'edit') {
       this.element.scrollTop = 0
-      if (treePositionChanged) {
+      if (treePositionChanged || modeChanged) {
         this.textareaElement.scrollTop = 0
         this.setState({title, comment})
       }

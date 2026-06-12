@@ -217,6 +217,7 @@ export default class Goban extends Component {
       gameTree,
       treePosition,
       board,
+      smartCoordinateMarkers = [],
       paintMap = [],
       analysis,
       analysisType,
@@ -253,6 +254,19 @@ export default class Goban extends Component {
   ) {
     let signMap = board.signMap
     let markerMap = board.markers
+
+    if (smartCoordinateMarkers.length > 0) {
+      markerMap = markerMap.map((row) => [...row])
+
+      for (let {
+        vertex: [x, y],
+        label,
+      } of smartCoordinateMarkers) {
+        if (markerMap[y]?.[x] == null) {
+          markerMap[y][x] = {type: 'label', label}
+        }
+      }
+    }
 
     let transformLine = (line) =>
       gobantransformer.transformLine(

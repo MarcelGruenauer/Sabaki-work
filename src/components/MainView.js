@@ -102,6 +102,7 @@ export default class MainView extends Component {
       fuzzyStonePlacement,
       animateStonePlacement,
       boardTransformation,
+      smartCoordinateData,
 
       selectedTool,
       findText,
@@ -137,6 +138,10 @@ export default class MainView extends Component {
           gameTree,
           treePosition,
           board,
+          smartCoordinateMarkers:
+            mode !== 'edit' && smartCoordinateData != null
+              ? smartCoordinateData.markers
+              : [],
           highlightVertices:
             findVertex && mode === 'find' ? [findVertex] : highlightVertices,
           analysisType,
