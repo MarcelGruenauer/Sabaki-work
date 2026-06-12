@@ -15,6 +15,10 @@ describe('move annotations', () => {
       let node = annotatedSiblingTree.root.children[0]
       let board = gametree.getBoard(annotatedSiblingTree, node.id)
 
+      assert.deepEqual(board.markers[0][0], {
+        type: 'point',
+        moveAnnotationType: 'good',
+      })
       assert.deepEqual(board.siblingsInfo[[0, 0]], {sign: 1, type: 'good'})
       assert.deepEqual(board.siblingsInfo[[1, 1]], {sign: 1, type: 'bad'})
     })

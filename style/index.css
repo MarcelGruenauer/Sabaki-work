@@ -26,6 +26,12 @@
   }
   #goban.crosshair {
     cursor: crosshair;
+  }
+  #goban.currentmove_good .shudan-marker_point .shudan-marker {
+    fill: #59A80F;
+  }
+  #goban.currentmove_bad .shudan-marker_point .shudan-marker {
+    fill: #F02311;
 }
 
 header, #bar .bar {

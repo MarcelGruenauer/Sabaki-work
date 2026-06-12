@@ -274,9 +274,26 @@ export function getBoard(tree, id) {
       siblingsInfo: [],
     })
 
+    let getMoveAnnotationType = (node) => {
+      if (node.data.BM != null) {
+        return 'bad'
+      } else if (node.data.DO != null) {
+        return 'doubtful'
+      } else if (node.data.IT != null) {
+        return 'interesting'
+      } else if (node.data.TE != null) {
+        return 'good'
+      }
+
+      return null
+    }
+
     if (vertex != null && board.has(vertex)) {
       let [x, y] = vertex
-      board.markers[y][x] = {type: 'point'}
+      board.markers[y][x] = {
+        type: 'point',
+        moveAnnotationType: getMoveAnnotationType(node),
+      }
     }
 
     propData = {CR: 'circle', MA: 'cross', SQ: 'square', TR: 'triangle'}
@@ -346,17 +363,7 @@ export function getBoard(tree, id) {
 
       if (!board.has(v)) return
 
-      let type = null
-
-      if (node.data.BM != null) {
-        type = 'bad'
-      } else if (node.data.DO != null) {
-        type = 'doubtful'
-      } else if (node.data.IT != null) {
-        type = 'interesting'
-      } else if (node.data.TE != null) {
-        type = 'good'
-      }
+      let type = getMoveAnnotationType(node)
 
       list[v] = {sign, type}
     }
