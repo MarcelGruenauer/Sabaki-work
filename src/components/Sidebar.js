@@ -117,6 +117,7 @@ export default class Sidebar extends Component {
 
       winrateData,
       scoreLeadData,
+      smartCoordinateData,
     },
     {winrateGraphHeight, sidebarSplit},
   ) {
@@ -219,7 +220,12 @@ export default class Sidebar extends Component {
                       ? [1, node.data.GB[0]]
                       : [null, 1],
             title: node.data.N != null ? node.data.N[0] : '',
-            comment: node.data.C != null ? node.data.C[0] : '',
+            comment:
+              mode !== 'edit' && smartCoordinateData != null
+                ? smartCoordinateData.comment
+                : node.data.C != null
+                  ? node.data.C[0]
+                  : '',
 
             onCommentInput: this.handleCommentInput,
           }),

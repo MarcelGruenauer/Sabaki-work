@@ -22,6 +22,7 @@ import * as gametree from '../modules/gametree.js'
 import * as gtplogger from '../modules/gtplogger.js'
 import * as helper from '../modules/helper.js'
 import * as utils from '../modules/utils.js'
+import {getSmartCoordinateData} from '../modules/smartcoordinates.js'
 
 if (process.env.SABAKI_E2E) window.__sabaki = sabaki
 
@@ -343,6 +344,17 @@ class App extends Component {
     }
 
     state = {...state, ...inferredState, scoreBoard, areaMap}
+
+    let node = state.gameTree.get(state.treePosition)
+    let smartCoordinateData =
+      state.smartCoordinates && state.mode !== 'edit'
+        ? getSmartCoordinateData(
+            node.data.C != null ? node.data.C[0] : '',
+            state.board,
+          )
+        : {comment: node.data.C != null ? node.data.C[0] : '', markers: []}
+
+    state = {...state, smartCoordinateData}
 
     return h(
       'section',
