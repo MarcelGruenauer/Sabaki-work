@@ -47,8 +47,21 @@ export async function showInputBox(message) {
   return new Promise((resolve) => {
     sabaki.setState({
       inputBoxText: message,
+      inputBoxFields: null,
       showInputBox: true,
       onInputBoxSubmit: (evt) => resolve(evt.value),
+      onInputBoxCancel: () => resolve(null),
+    })
+  })
+}
+
+export async function showInputForm(message, fields) {
+  return new Promise((resolve) => {
+    sabaki.setState({
+      inputBoxText: message,
+      inputBoxFields: fields,
+      showInputBox: true,
+      onInputBoxSubmit: (evt) => resolve(evt.values),
       onInputBoxCancel: () => resolve(null),
     })
   })
