@@ -557,6 +557,37 @@ exports.get = function (props = {}) {
             sabaki.generateMove(syncerId, sabaki.state.treePosition)
           },
         },
+        {type: 'separator'},
+        {
+          label: i18n.t('menu.engines', '&Tsumego Frame'),
+          click: async () => {
+            let values = await dialog.showInputForm(
+              i18n.t('menu.engines', 'Tsumego Frame'),
+              [
+                {
+                  name: 'margin',
+                  label: i18n.t('menu.engines', 'Distance from wall'),
+                  type: 'number',
+                  min: 0,
+                  step: 1,
+                  value: 4,
+                },
+                {
+                  name: 'ko',
+                  label: i18n.t('menu.engines', 'Ko allowed?'),
+                  type: 'checkbox',
+                  value: false,
+                },
+              ],
+            )
+            if (values == null) return
+
+            sabaki.makeTsumegoFrame({
+              margin: values.margin,
+              ko: values.ko,
+            })
+          },
+        },
       ],
     },
     {
