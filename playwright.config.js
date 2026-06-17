@@ -54,5 +54,10 @@ module.exports = defineConfig({
       testMatch: /annotation-toggle\.spec\.js/,
       dependencies: ['smoke'],
     },
+    {
+      name: 'smart-coordinates',
+      testMatch: /smart-coordinates\.spec\.js/,
+      dependencies: ['smoke'],
+    },
   ],
 })

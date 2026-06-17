@@ -78,5 +78,18 @@ describe('smartcoordinates', () => {
       assert.equal(data.comment, 'D4 and A')
       assert.deepEqual(data.markers, [{vertex: [9, 9], label: 'A'}])
     })
+
+    it('labels coordinates that refer to the current move marker', () => {
+      let board = getBoard()
+      board.currentVertex = [17, 3]
+      board.markers[3][17] = {type: 'point'}
+
+      let data = getSmartCoordinateData('S16 is the current move.', board)
+
+      assert.equal(data.comment, 'A is the current move.')
+      assert.deepEqual(data.markers, [
+        {vertex: [17, 3], label: 'A', currentMoveMarker: true},
+      ])
+    })
   })
 })
