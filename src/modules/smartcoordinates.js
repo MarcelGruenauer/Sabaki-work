@@ -14,6 +14,14 @@ function getMarker(board, [x, y]) {
   return board.markers?.[y]?.[x] ?? null
 }
 
+function isCurrentMoveMarker(board, vertex, marker) {
+  return (
+    marker?.type === 'point' &&
+    board.currentVertex != null &&
+    vertexToKey(vertex) === vertexToKey(board.currentVertex)
+  )
+}
+
 function getNextLabel(usedLabels) {
   let lastIndex = -1
 
@@ -64,7 +72,8 @@ export function getSmartCoordinateData(comment, board) {
     if (vertexLabels.has(key)) return vertexLabels.get(key)
 
     let marker = getMarker(board, vertex)
-    if (marker != null) return coord
+    let currentMoveMarker = isCurrentMoveMarker(board, vertex, marker)
+    if (marker != null && !currentMoveMarker) return coord
 
     if (!smartLabels.has(key)) {
       let label = getNextLabel(usedLabels)
@@ -72,7 +81,11 @@ export function getSmartCoordinateData(comment, board) {
 
       usedLabels.add(label)
       smartLabels.set(key, label)
-      markers.push({vertex, label})
+      markers.push({
+        vertex,
+        label,
+        ...(currentMoveMarker ? {currentMoveMarker} : {}),
+      })
     }
 
     return smartLabels.get(key)
