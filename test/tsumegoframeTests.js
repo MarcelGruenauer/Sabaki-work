@@ -1,5 +1,9 @@
 import assert from 'assert'
-import {getTsumegoFrame} from '../src/modules/tsumegoframe.js'
+import * as gametree from '../src/modules/gametree.js'
+import {
+  getTsumegoFrame,
+  getTsumegoFramePlayer,
+} from '../src/modules/tsumegoframe.js'
 
 describe('tsumegoframe', () => {
   it('does not generate frame stones on an empty board', () => {
@@ -71,6 +75,71 @@ describe('tsumegoframe', () => {
       [3, 7],
       [1, 8],
     ])
+  })
+
+  it('takes the color to play into consideration for ko', () => {
+    let signMap = Array.from({length: 9}, () => Array(9).fill(0))
+    signMap[0][0] = 1
+    signMap[0][1] = -1
+    signMap[1][0] = 1
+
+    let blackFrame = getTsumegoFrame(signMap, {
+      komi: 6.5,
+      blackToPlay: true,
+      ko: true,
+      margin: 4,
+    })
+    let whiteFrame = getTsumegoFrame(signMap, {
+      komi: 6.5,
+      blackToPlay: false,
+      ko: true,
+      margin: 4,
+    })
+
+    assert.notDeepEqual(blackFrame.blacks, whiteFrame.blacks)
+    assert.notDeepEqual(blackFrame.whites, whiteFrame.whites)
+  })
+
+  it('defaults the color to play from the current node move', () => {
+    let tree = gametree.new().mutate((draft) => {
+      draft.appendNode(draft.root.id, {B: ['aa']})
+      draft.appendNode(draft.root.id, {W: ['bb']})
+    })
+    let [blackNode, whiteNode] = tree.root.children
+
+    assert.equal(getTsumegoFramePlayer(tree, blackNode.id), -1)
+    assert.equal(getTsumegoFramePlayer(tree, whiteNode.id), 1)
+  })
+
+  it('defaults the color to play from PL before the next move', () => {
+    let tree = gametree.new().mutate((draft) => {
+      draft.updateProperty(draft.root.id, 'PL', ['W'])
+      draft.appendNode(draft.root.id, {B: ['aa']})
+    })
+
+    assert.equal(getTsumegoFramePlayer(tree, tree.root.id), -1)
+  })
+
+  it('defaults the color to play from the current variation next move', () => {
+    let tree = gametree.new().mutate((draft) => {
+      draft.appendNode(draft.root.id, {B: ['aa']})
+      draft.appendNode(draft.root.id, {W: ['bb']})
+    })
+    let [blackNode, whiteNode] = tree.root.children
+
+    assert.equal(getTsumegoFramePlayer(tree, tree.root.id), 1)
+    assert.equal(
+      getTsumegoFramePlayer(tree, tree.root.id, {
+        [tree.root.id]: whiteNode.id,
+      }),
+      -1,
+    )
+    assert.equal(
+      getTsumegoFramePlayer(tree, tree.root.id, {
+        [tree.root.id]: blackNode.id,
+      }),
+      1,
+    )
   })
 
   it('keeps generated stones inside the board for multiple board sizes', () => {

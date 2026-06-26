@@ -19,7 +19,7 @@ import * as gobantransformer from './gobantransformer.js'
 import * as gtplogger from './gtplogger.js'
 import * as helper from './helper.js'
 import * as sound from './sound.js'
-import {getTsumegoFrame} from './tsumegoframe.js'
+import {getTsumegoFrame, getTsumegoFramePlayer} from './tsumegoframe.js'
 
 deadstones.useFetch('./node_modules/@sabaki/deadstones/wasm/deadstones_bg.wasm')
 
@@ -1607,9 +1607,12 @@ class Sabaki extends EventEmitter {
     else this.goToEnd()
   }
 
-  makeTsumegoFrame({margin = 4, ko = false} = {}) {
+  makeTsumegoFrame({margin = 4, ko = false, player = null} = {}) {
     margin = Math.max(0, Math.round(+margin))
     if (isNaN(margin)) return false
+
+    if (player == null) player = this.getPlayer(this.state.treePosition)
+    player = player > 0 ? 1 : -1
 
     let {gameTrees, gameIndex, treePosition} = this.state
     let tree = gameTrees[gameIndex]
@@ -1619,7 +1622,7 @@ class Sabaki extends EventEmitter {
 
     let {blacks, whites} = getTsumegoFrame(board.signMap, {
       komi,
-      blackToPlay: this.getPlayer(treePosition) > 0,
+      blackToPlay: player > 0,
       ko,
       margin,
     })
@@ -1628,7 +1631,7 @@ class Sabaki extends EventEmitter {
 
     let newTreePosition = null
     let newTree = tree.mutate((draft) => {
-      let data = {}
+      let data = {PL: [player > 0 ? 'B' : 'W']}
       if (blacks.length > 0) data.AB = blacks.map(sgf.stringifyVertex)
       if (whites.length > 0) data.AW = whites.map(sgf.stringifyVertex)
 
@@ -1640,6 +1643,18 @@ class Sabaki extends EventEmitter {
     this.setCurrentTreePosition(newTree, newTreePosition)
 
     return true
+  }
+
+  getTsumegoFramePlayer(treePosition) {
+    let {gameTrees, gameIndex, gameCurrents} = this.state
+    let tree = gameTrees[gameIndex]
+
+    return getTsumegoFramePlayer(
+      tree,
+      treePosition,
+      gameCurrents[gameIndex],
+      this.getPlayer(treePosition),
+    )
   }
 
   goToNextFork() {

@@ -284,3 +284,28 @@ export function getTsumegoFrame(signMap, {komi = 0, blackToPlay, ko, margin}) {
     analysisRegion: getAnalysisRegion(regionPos),
   }
 }
+
+export function getTsumegoFramePlayer(
+  tree,
+  treePosition,
+  currents = {},
+  fallback = 1,
+) {
+  let node = tree.get(treePosition)
+
+  if (node.data.B != null) return -1
+  if (node.data.W != null) return 1
+
+  if (node.data.PL != null) {
+    return node.data.PL[0] === 'W' ? -1 : 1
+  }
+
+  let next = tree.navigate(treePosition, 1, currents)
+
+  if (next != null) {
+    if (next.data.B != null) return 1
+    if (next.data.W != null) return -1
+  }
+
+  return fallback
+}

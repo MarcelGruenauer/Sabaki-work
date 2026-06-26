@@ -80,11 +80,7 @@ export default class InputBox extends Component {
 
   renderField(field, values) {
     let value = values[field.name]
-
-    return h(
-      'label',
-      {class: `field ${field.type}`},
-      h('span', {}, field.label),
+    let inputElement =
       field.type === 'checkbox'
         ? h('input', {
             name: field.name,
@@ -93,19 +89,41 @@ export default class InputBox extends Component {
             onChange: this.handleFieldInput,
             onKeyUp: this.handleKeyUp,
           })
-        : h('input', {
-            ref: (el) => {
-              if (field === this.props.fields[0]) this.inputElement = el
-            },
-            name: field.name,
-            type: field.type || 'text',
-            min: field.min,
-            max: field.max,
-            step: field.step,
-            value,
-            onInput: this.handleFieldInput,
-            onKeyUp: this.handleKeyUp,
-          }),
+        : field.type === 'select'
+          ? h(
+              'select',
+              {
+                ref: (el) => {
+                  if (field === this.props.fields[0]) this.inputElement = el
+                },
+                name: field.name,
+                value,
+                onChange: this.handleFieldInput,
+                onKeyUp: this.handleKeyUp,
+              },
+              field.options.map((option) =>
+                h('option', {value: option.value}, option.label),
+              ),
+            )
+          : h('input', {
+              ref: (el) => {
+                if (field === this.props.fields[0]) this.inputElement = el
+              },
+              name: field.name,
+              type: field.type || 'text',
+              min: field.min,
+              max: field.max,
+              step: field.step,
+              value,
+              onInput: this.handleFieldInput,
+              onKeyUp: this.handleKeyUp,
+            })
+
+    return h(
+      'label',
+      {class: `field ${field.type}`},
+      h('span', {}, field.label),
+      inputElement,
     )
   }
 
