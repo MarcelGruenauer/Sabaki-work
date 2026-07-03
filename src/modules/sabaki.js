@@ -252,8 +252,9 @@ class Sabaki extends EventEmitter {
         if (gameTrees.length > 1) {
           title +=
             ' — ' +
-            t((p) => `Game ${p.gameNumber}`, {
+            t((p) => `Game ${p.gameNumber} of ${p.gameCount}`, {
               gameNumber: gameIndex + 1,
+              gameCount: gameTrees.length,
             })
         }
 
