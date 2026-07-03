@@ -508,15 +508,19 @@ header {
   #slider .inner span {
     position: absolute;
     top: 0%;
-    left: 0;
     right: 0;
+    box-sizing: border-box;
+    min-width: 25px;
+    width: max-content;
     height: 22px;
     margin-top: -10px;
+    padding: 0 4px;
     background: #393939;
     color: #ccc;
     font-size: .8em;
     line-height: 22px;
     text-align: center;
+    white-space: nowrap;
     transition: top .2s, background .2s;
   }
   #slider:active .inner span {

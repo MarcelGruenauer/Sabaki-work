@@ -23,6 +23,51 @@ class Slider extends Component {
       this.buttonMouseDown = type
       onStartAutoscrolling({step: type === 'prev' ? -1 : 1})
     }
+
+    this.handleTextMouseDown = (evt) => {
+      if (!evt.altKey && !this.props.textIsTreePath) return
+
+      evt.preventDefault()
+      evt.stopPropagation()
+    }
+
+    this.handleTextClick = (evt) => {
+      if (!evt.altKey && !this.props.textIsTreePath) return
+
+      evt.preventDefault()
+      evt.stopPropagation()
+
+      if (evt.altKey) {
+        let {onTextToggle = helper.noop} = this.props
+        onTextToggle()
+      }
+    }
+
+    this.handleTextTouchStart = (evt) => {
+      clearTimeout(this.longPressId)
+      this.longPressFired = false
+
+      this.longPressId = setTimeout(() => {
+        this.longPressFired = true
+
+        let {onTextToggle = helper.noop} = this.props
+        onTextToggle()
+      }, 600)
+
+      if (this.props.textIsTreePath) {
+        evt.preventDefault()
+        evt.stopPropagation()
+      }
+    }
+
+    this.handleTextTouchEnd = (evt) => {
+      clearTimeout(this.longPressId)
+
+      if (!this.longPressFired && !this.props.textIsTreePath) return
+
+      evt.preventDefault()
+      evt.stopPropagation()
+    }
   }
 
   componentDidMount() {
@@ -49,10 +94,18 @@ class Slider extends Component {
     })
   }
 
-  shouldComponentUpdate({showSlider}) {
+  componentWillUnmount() {
+    clearTimeout(this.longPressId)
+  }
+
+  shouldComponentUpdate({showSlider, text, textIsTreePath}) {
     return (
       showSlider &&
-      (this.sliderAreaMouseDown || this.buttonMouseDown || !this.dirty)
+      (this.sliderAreaMouseDown ||
+        this.buttonMouseDown ||
+        !this.dirty ||
+        text !== this.props.text ||
+        textIsTreePath !== this.props.textIsTreePath)
     )
   }
 
@@ -100,7 +153,18 @@ class Slider extends Component {
           onMouseDown: this.handleSliderAreaMouseDown,
         },
 
-        h('span', {style: {top: percent + '%'}}, text),
+        h(
+          'span',
+          {
+            style: {top: percent + '%'},
+            onMouseDown: this.handleTextMouseDown,
+            onClick: this.handleTextClick,
+            onTouchStart: this.handleTextTouchStart,
+            onTouchEnd: this.handleTextTouchEnd,
+            onTouchCancel: this.handleTextTouchEnd,
+          },
+          text,
+        ),
       ),
     )
   }

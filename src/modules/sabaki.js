@@ -1599,18 +1599,23 @@ class Sabaki extends EventEmitter {
   }
 
   goToMoveNumber(number) {
+    if (number.toString().trim().match(/[a-z]/i)) {
+      let {gameTrees, gameIndex} = this.state
+      let tree = gameTrees[gameIndex]
+      let node = gametree.getNodeByTreePath(tree, number)
+
+      if (node != null) this.setCurrentTreePosition(tree, node.id)
+      return
+    }
+
     number = +number
 
     if (isNaN(number)) return
     if (number < 0) number = 0
 
-    let {gameTrees, gameIndex, gameCurrents} = this.state
+    let {gameTrees, gameIndex} = this.state
     let tree = gameTrees[gameIndex]
-    let node = tree.navigate(
-      tree.root.id,
-      Math.round(number),
-      gameCurrents[gameIndex],
-    )
+    let node = tree.navigate(tree.root.id, Math.round(number), {})
 
     if (node != null) this.setCurrentTreePosition(tree, node.id)
     else this.goToEnd()

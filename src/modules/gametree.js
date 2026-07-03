@@ -8,6 +8,7 @@ import {
 import {getId} from './utils.js'
 
 const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+const variationAlpha = 'abcdefghijklmnopqrstuvwxyz'
 
 let boardCache = {}
 
@@ -141,6 +142,113 @@ export function setGameInfo(tree, data) {
       }
     }
   })
+}
+
+export function parseTreePath(value) {
+  let path = value.toString().trim()
+
+  if (!/^\d+(?:[a-z]\d+)*$/.test(path)) return null
+
+  let result = []
+  let match = path.match(/^\d+/)
+
+  result.push({moveNumber: +match[0]})
+  path = path.slice(match[0].length)
+
+  while (path !== '') {
+    match = path.match(/^([a-z])(\d+)/)
+
+    result.push({
+      variationIndex: match[1].charCodeAt(0) - 'a'.charCodeAt(0) + 1,
+      moveNumber: +match[2],
+    })
+
+    path = path.slice(match[0].length)
+  }
+
+  return result
+}
+
+export function getNodeByTreePath(tree, path) {
+  let parts = parseTreePath(path)
+  if (parts == null) return null
+
+  let followMainLine = (node, moveCount) => {
+    for (let i = 0; i < moveCount; i++) {
+      if (node.children[0] == null) return null
+      node = node.children[0]
+    }
+
+    return node
+  }
+
+  let node = followMainLine(tree.root, parts[0].moveNumber)
+  if (node == null) return null
+
+  for (let {variationIndex, moveNumber} of parts.slice(1)) {
+    let parent = tree.get(node.parentId)
+    if (parent == null) return null
+
+    node = parent.children[variationIndex]
+    if (node == null) return null
+
+    node = followMainLine(node, moveNumber - 1)
+    if (node == null) return null
+  }
+
+  return node
+}
+
+export function getTreePath(tree, id) {
+  let node = tree.get(id)
+  if (node == null) return null
+
+  let nodes = []
+
+  while (node.parentId != null) {
+    let parent = tree.get(node.parentId)
+    if (parent == null) return null
+
+    let variationIndex = parent.children.findIndex(
+      (child) => child.id === node.id,
+    )
+    if (variationIndex < 0) return null
+
+    nodes.unshift(node)
+
+    node = parent
+  }
+
+  let variationPositions = nodes
+    .map((node, i) => {
+      let parent = tree.get(node.parentId)
+      let variationIndex = parent.children.findIndex(
+        (child) => child.id === node.id,
+      )
+
+      return variationIndex > 0 ? i : null
+    })
+    .filter((x) => x != null)
+
+  if (variationPositions.length === 0) return nodes.length.toString()
+
+  let result = (variationPositions[0] + 1).toString()
+
+  for (let i = 0; i < variationPositions.length; i++) {
+    let position = variationPositions[i]
+    let parent = tree.get(nodes[position].parentId)
+    let variationIndex = parent.children.findIndex(
+      (child) => child.id === nodes[position].id,
+    )
+    let variationLetter = variationAlpha[variationIndex - 1]
+
+    if (variationLetter == null) return null
+
+    let nextPosition = variationPositions[i + 1] || nodes.length - 1
+    result += variationLetter + (nextPosition - position + 1)
+  }
+
+  return result
 }
 
 export function getMatrixDict(tree) {
