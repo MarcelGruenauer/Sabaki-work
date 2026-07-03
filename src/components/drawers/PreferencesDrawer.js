@@ -333,6 +333,36 @@ class GeneralTab extends Component {
           ),
         ),
         h(PreferencesItem, {
+          id: 'view.show_gamename_in_title',
+          text: t('Show game name in window title'),
+        }),
+        h(
+          'li',
+          {class: 'select'},
+          h(
+            'label',
+            {},
+            t('Comment Font Size:'),
+            ' ',
+
+            h(
+              'select',
+              {onChange: this.handleCommentFontSizeChange},
+
+              [14, 15, 16, 17, 18, 19, 20].map((fontSize) =>
+                h(
+                  'option',
+                  {
+                    value: fontSize,
+                    selected: this.state.commentFontSize === fontSize,
+                  },
+                  `${fontSize}px`,
+                ),
+              ),
+            ),
+          ),
+        ),
+        h(PreferencesItem, {
           id: 'game.show_ko_warning',
           text: t('Show ko warning'),
         }),
