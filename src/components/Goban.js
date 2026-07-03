@@ -395,6 +395,27 @@ export default class Goban extends Component {
       board.height,
     )
 
+    // Calculate current move annotation
+
+    let currentMoveAnnotationType = null
+    if (
+      showMoveColorization &&
+      !showMoveNumbers &&
+      variationMoves == null &&
+      board.currentVertex != null
+    ) {
+      let [x, y] = board.currentVertex
+      let marker = board.markers[y]?.[x]
+
+      if (marker?.type === 'point') {
+        currentMoveAnnotationType = marker.moveAnnotationType
+
+        if (!['good', 'bad'].includes(currentMoveAnnotationType)) {
+          currentMoveAnnotationType = null
+        }
+      }
+    }
+
     // Calculate lines
 
     let drawTemporaryLine = !!drawLineMode && !!temporaryLine
@@ -429,9 +450,13 @@ export default class Goban extends Component {
       if (showSiblings) {
         for (let v in board.siblingsInfo) {
           let [x, y] = v.split(',').map((x) => +x)
-          let {sign} = board.siblingsInfo[v]
+          let {sign, type} = board.siblingsInfo[v]
 
-          ghostStoneMap[y][x] = {sign, faint: showNextMoves}
+          ghostStoneMap[y][x] = {
+            sign,
+            type: showMoveColorization ? type : null,
+            faint: showNextMoves,
+          }
         }
       }
 
@@ -552,7 +577,11 @@ export default class Goban extends Component {
 
     return h(BoundedGoban, {
       id: 'goban',
-      class: classNames({crosshair}),
+      class: classNames({
+        crosshair,
+        [`currentmove_${currentMoveAnnotationType}`]:
+          currentMoveAnnotationType != null,
+      }),
       style: {top, left},
       innerProps: {
         ref: (el) => (this.element = el),
