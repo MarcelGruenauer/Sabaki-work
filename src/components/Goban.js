@@ -308,6 +308,7 @@ export default class Goban extends Component {
       gameTree,
       treePosition,
       board,
+      smartCoordinateMarkers = [],
       paintMap = [],
       analysis,
       analysisType,
@@ -344,6 +345,27 @@ export default class Goban extends Component {
   ) {
     let signMap = board.signMap
     let markerMap = board.markers
+
+    if (smartCoordinateMarkers.length > 0) {
+      markerMap = markerMap.map((row) => [...row])
+
+      for (let {
+        vertex: [x, y],
+        label,
+        currentMoveMarker,
+      } of smartCoordinateMarkers) {
+        if (currentMoveMarker) {
+          markerMap[y][x] = {
+            ...markerMap[y][x],
+            type: 'point',
+            label,
+            currentMoveMarker: true,
+          }
+        } else if (markerMap[y]?.[x] == null) {
+          markerMap[y][x] = {type: 'label', label}
+        }
+      }
+    }
 
     let transformLine = (line) =>
       gobantransformer.transformLine(
@@ -575,50 +597,93 @@ export default class Goban extends Component {
       }
     }
 
-    return h(BoundedGoban, {
-      id: 'goban',
-      class: classNames({
-        crosshair,
-        [`currentmove_${currentMoveAnnotationType}`]:
-          currentMoveAnnotationType != null,
+    let currentSmartCoordinateMarker = null
+
+    for (let y = 0; y < markerMap.length; y++) {
+      let x = markerMap[y].findIndex((marker) => marker?.currentMoveMarker)
+      if (x >= 0) {
+        currentSmartCoordinateMarker = {
+          vertex: transformVertex([x, y]),
+          label: markerMap[y][x].label,
+        }
+        break
+      }
+    }
+
+    let currentSmartCoordinateStyle =
+      currentSmartCoordinateMarker == null
+        ? null
+        : `#goban .shudan-vertex[data-x="${currentSmartCoordinateMarker.vertex[0]}"][data-y="${currentSmartCoordinateMarker.vertex[1]}"].shudan-marker_point .shudan-marker {
+            fill: #8A8A8A;
+          }
+          #goban .shudan-vertex[data-x="${currentSmartCoordinateMarker.vertex[0]}"][data-y="${currentSmartCoordinateMarker.vertex[1]}"].shudan-marker_point .shudan-stone::after {
+            content: ${JSON.stringify(currentSmartCoordinateMarker.label)};
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            font-size: .6em;
+            line-height: 1;
+            pointer-events: none;
+            text-align: center;
+            transform: translate(-50%, -50%);
+          }
+          #goban .shudan-vertex[data-x="${currentSmartCoordinateMarker.vertex[0]}"][data-y="${currentSmartCoordinateMarker.vertex[1]}"].shudan-marker_point.shudan-sign_1 .shudan-stone::after {
+            color: var(--shudan-black-foreground-color);
+          }
+          #goban .shudan-vertex[data-x="${currentSmartCoordinateMarker.vertex[0]}"][data-y="${currentSmartCoordinateMarker.vertex[1]}"].shudan-marker_point.shudan-sign_-1 .shudan-stone::after {
+            color: var(--shudan-white-foreground-color);
+          }`
+
+    return [
+      currentSmartCoordinateStyle != null &&
+        h('style', {}, currentSmartCoordinateStyle),
+
+      h(BoundedGoban, {
+        id: 'goban',
+        class: classNames({
+          crosshair,
+          [`currentmove_${currentMoveAnnotationType}`]:
+            currentMoveAnnotationType != null,
+          currentmove_smartcoordinate: currentSmartCoordinateMarker != null,
+        }),
+        style: {top, left},
+        innerProps: {
+          ref: (el) => (this.element = el),
+          onTouchStart: this.handleTouchStart,
+          onTouchMove: this.handleTouchMove,
+          onTouchEnd: this.handleTouchEnd,
+          onTouchCancel: this.handleTouchEnd,
+        },
+
+        maxWidth,
+        maxHeight,
+
+        showCoordinates,
+        coordX,
+        coordY,
+        fuzzyStonePlacement,
+        animateStonePlacement: clicked && animateStonePlacement,
+
+        signMap: gobantransformer.transformMap(signMap, transformation),
+        markerMap: gobantransformer.transformMap(markerMap, transformation),
+        ghostStoneMap: gobantransformer.transformMap(
+          ghostStoneMap,
+          transformation,
+        ),
+        paintMap: gobantransformer.transformMap(paintMap, transformation, {
+          ignoreInvert: true,
+        }),
+        heatMap: gobantransformer.transformMap(heatMap, transformation),
+        lines: lines.map(transformLine),
+        selectedVertices: highlightVertices.map(transformVertex),
+        dimmedVertices: dimmedStones.map(transformVertex),
+
+        onVertexMouseUp: this.handleVertexMouseUp,
+        onVertexMouseDown: this.handleVertexMouseDown,
+        onVertexMouseMove: this.handleVertexMouseMove,
+        onVertexMouseEnter: this.handleVertexMouseEnter,
+        onVertexMouseLeave: this.handleVertexMouseLeave,
       }),
-      style: {top, left},
-      innerProps: {
-        ref: (el) => (this.element = el),
-        onTouchStart: this.handleTouchStart,
-        onTouchMove: this.handleTouchMove,
-        onTouchEnd: this.handleTouchEnd,
-        onTouchCancel: this.handleTouchEnd,
-      },
-
-      maxWidth,
-      maxHeight,
-
-      showCoordinates,
-      coordX,
-      coordY,
-      fuzzyStonePlacement,
-      animateStonePlacement: clicked && animateStonePlacement,
-
-      signMap: gobantransformer.transformMap(signMap, transformation),
-      markerMap: gobantransformer.transformMap(markerMap, transformation),
-      ghostStoneMap: gobantransformer.transformMap(
-        ghostStoneMap,
-        transformation,
-      ),
-      paintMap: gobantransformer.transformMap(paintMap, transformation, {
-        ignoreInvert: true,
-      }),
-      heatMap: gobantransformer.transformMap(heatMap, transformation),
-      lines: lines.map(transformLine),
-      selectedVertices: highlightVertices.map(transformVertex),
-      dimmedVertices: dimmedStones.map(transformVertex),
-
-      onVertexMouseUp: this.handleVertexMouseUp,
-      onVertexMouseDown: this.handleVertexMouseDown,
-      onVertexMouseMove: this.handleVertexMouseMove,
-      onVertexMouseEnter: this.handleVertexMouseEnter,
-      onVertexMouseLeave: this.handleVertexMouseLeave,
-    })
+    ]
   }
 }

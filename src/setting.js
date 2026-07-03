@@ -63,6 +63,7 @@ let defaults = {
   'cleanmarkup.triangle': true,
   'cleanmarkup.winrate': false,
   'comments.show_move_interpretation': true,
+  'comments.smart_coordinates': false,
   'comments.commit_delay': 500,
   'comments.font_size': 14,
   'console.max_history_count': 1000,

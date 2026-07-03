@@ -59,5 +59,10 @@ module.exports = defineConfig({
       testMatch: /analysis-value-display\.spec\.js/,
       dependencies: ['smoke'],
     },
+    {
+      name: 'smart-coordinates',
+      testMatch: /smart-coordinates\.spec\.js/,
+      dependencies: ['smoke'],
+    },
   ],
 })

@@ -363,6 +363,10 @@ class GeneralTab extends Component {
           ),
         ),
         h(PreferencesItem, {
+          id: 'comments.smart_coordinates',
+          text: t('Show smart coordinates in comments'),
+        }),
+        h(PreferencesItem, {
           id: 'game.show_ko_warning',
           text: t('Show ko warning'),
         }),
