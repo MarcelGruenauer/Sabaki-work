@@ -13,6 +13,18 @@ const i18n = require('./i18n')
 const setting = require('./setting')
 const updater = require('./updater')
 
+const localAllFeatureBranches = [
+  'setting-comment-font-size',
+  'setting-game-name-window-title',
+  'tree-paths',
+  'board-context-menu-go-to-move',
+  'thumbnails',
+  'color-move-markers',
+  'smart-coordinates',
+  'tsumego-frame',
+  'window-title-game-m-of-n',
+]
+
 let windows = []
 let openfile = null
 let isQuitting = false
@@ -415,6 +427,12 @@ async function main() {
   })
 
   await app.whenReady()
+
+  app.setAboutPanelOptions({
+    credits: `Feature branches in this local-all build:\n${localAllFeatureBranches.join(
+      '\n',
+    )}`,
+  })
 
   setupIpcHandlers()
 
