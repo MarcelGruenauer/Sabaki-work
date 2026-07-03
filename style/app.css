@@ -98,14 +98,52 @@ img {
     transform: translateY(0);
     box-shadow: 0 0 10px rgba(0, 0, 0, .5);
   }
-  #input-box input {
+  #input-box input, #input-box select {
     box-sizing: border-box;
     background: #111;
     color: #eee;
     width: 100%;
   }
-  #input-box input:focus {
+  #input-box input:focus, #input-box select:focus {
     background: #1a1a1a;
+  }
+  #input-box form {
+    margin: 0;
+  }
+  #input-box form .message {
+    margin: 0 0 7px;
+    font-weight: bold;
+  }
+  #input-box form .field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 7px 0;
+  }
+  #input-box form .field span {
+    flex: 1;
+  }
+  #input-box form .field input[type="number"] {
+    width: 80px;
+    flex: none;
+  }
+  #input-box form .field.select span {
+    white-space: nowrap;
+  }
+  #input-box form .field select {
+    width: auto;
+    flex: none;
+  }
+  #input-box form .field input[type="checkbox"] {
+    width: auto;
+    flex: none;
+  }
+  #input-box form .field input[type="checkbox"]::before {
+    filter: invert(100%);
+  }
+  #input-box form button {
+    width: 100%;
+    margin-top: 5px;
 }
 
 form p, form ul li {

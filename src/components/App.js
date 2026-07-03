@@ -405,6 +405,7 @@ class App extends Component {
 
       h(InputBox, {
         text: state.inputBoxText,
+        fields: state.inputBoxFields,
         show: state.showInputBox,
         onSubmit: state.onInputBoxSubmit,
         onCancel: state.onInputBoxCancel,

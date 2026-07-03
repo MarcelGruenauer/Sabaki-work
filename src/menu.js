@@ -558,6 +558,49 @@ exports.get = function (props = {}) {
             sabaki.generateMove(syncerId, sabaki.state.treePosition)
           },
         },
+        {type: 'separator'},
+        {
+          label: i18n.t('menu.engines', '&Tsumego Frame'),
+          click: async () => {
+            let player = sabaki.getTsumegoFramePlayer(sabaki.state.treePosition)
+            let values = await dialog.showInputForm(
+              i18n.t('menu.engines', 'Tsumego Frame'),
+              [
+                {
+                  name: 'margin',
+                  label: i18n.t('menu.engines', 'Distance from wall'),
+                  type: 'number',
+                  min: 0,
+                  step: 1,
+                  value: 4,
+                },
+                {
+                  name: 'player',
+                  label: i18n.t('menu.engines', 'Color to play'),
+                  type: 'select',
+                  value: player > 0 ? 'B' : 'W',
+                  options: [
+                    {value: 'B', label: i18n.t('menu.engines', 'Black')},
+                    {value: 'W', label: i18n.t('menu.engines', 'White')},
+                  ],
+                },
+                {
+                  name: 'ko',
+                  label: i18n.t('menu.engines', 'Ko allowed?'),
+                  type: 'checkbox',
+                  value: false,
+                },
+              ],
+            )
+            if (values == null) return
+
+            sabaki.makeTsumegoFrame({
+              margin: values.margin,
+              ko: values.ko,
+              player: values.player === 'B' ? 1 : -1,
+            })
+          },
+        },
       ],
     },
     {

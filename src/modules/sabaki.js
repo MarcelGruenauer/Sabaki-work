@@ -19,6 +19,7 @@ import * as gobantransformer from './gobantransformer.js'
 import * as gtplogger from './gtplogger.js'
 import * as helper from './helper.js'
 import * as sound from './sound.js'
+import {getTsumegoFrame, getTsumegoFramePlayer} from './tsumegoframe.js'
 
 deadstones.useFetch('./node_modules/@sabaki/deadstones/wasm/deadstones_bg.wasm')
 
@@ -118,6 +119,7 @@ class Sabaki extends EventEmitter {
 
       showInputBox: false,
       inputBoxText: '',
+      inputBoxFields: null,
       onInputBoxSubmit: helper.noop,
       onInputBoxCancel: helper.noop,
 
@@ -1696,6 +1698,56 @@ class Sabaki extends EventEmitter {
 
     if (node != null) this.setCurrentTreePosition(tree, node.id)
     else this.goToEnd()
+  }
+
+  makeTsumegoFrame({margin = 4, ko = false, player = null} = {}) {
+    margin = Math.max(0, Math.round(+margin))
+    if (isNaN(margin)) return false
+
+    if (player == null) player = this.getPlayer(this.state.treePosition)
+    player = player > 0 ? 1 : -1
+
+    let {gameTrees, gameIndex, treePosition} = this.state
+    let tree = gameTrees[gameIndex]
+    let board = gametree.getBoard(tree, treePosition)
+    let komi = +gametree.getRootProperty(tree, 'KM', 0)
+    if (isNaN(komi)) komi = 0
+
+    let {blacks, whites} = getTsumegoFrame(board.signMap, {
+      komi,
+      blackToPlay: player > 0,
+      ko,
+      margin,
+    })
+
+    if (blacks.length === 0 && whites.length === 0) return false
+
+    let newTreePosition = null
+    let newTree = tree.mutate((draft) => {
+      let data = {PL: [player > 0 ? 'B' : 'W']}
+      if (blacks.length > 0) data.AB = blacks.map(sgf.stringifyVertex)
+      if (whites.length > 0) data.AW = whites.map(sgf.stringifyVertex)
+
+      newTreePosition = draft.appendNode(treePosition, data)
+    })
+
+    this.closeDrawer()
+    this.setMode('play')
+    this.setCurrentTreePosition(newTree, newTreePosition)
+
+    return true
+  }
+
+  getTsumegoFramePlayer(treePosition) {
+    let {gameTrees, gameIndex, gameCurrents} = this.state
+    let tree = gameTrees[gameIndex]
+
+    return getTsumegoFramePlayer(
+      tree,
+      treePosition,
+      gameCurrents[gameIndex],
+      this.getPlayer(treePosition),
+    )
   }
 
   goToNextFork() {
